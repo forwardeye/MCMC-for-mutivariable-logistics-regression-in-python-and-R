@@ -1,0 +1,110 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 25 13:51:50 2018
+
+@author: yangl
+"""
+
+import numpy as np  
+from numpy.linalg import cholesky  
+import matplotlib.pyplot as plt  
+  
+'''下面这一段代码用于采样，为以后的参数估计产生样本'''
+'''sampleNo = 1000;  
+mu_trigger = np.array([[2, 1]])  
+Sigma = np.array([[1, 0.5], [1.5, 3]])  
+R = cholesky(Sigma)  
+s = np.dot(np.random.randn(sampleNo, 2), R) + mu_trigger '''
+#plt.subplot(111)  
+# 注意绘制的是散点图，而不是直方图  
+#plt.plot(s[:,0],s[:,1],'+')  
+#plt.plot(s[:,0],'+')  
+#plt.hist(s[:,1], 30, normed=True)  展示一维分布的示意图 确定是正态分布
+#plt.show()  
+
+def random_pick(some_list,probabilities):
+    x=np.random.uniform(0,1)
+    cumulative_probability=0.0
+    for item,item_probability in zip(some_list,probabilities):
+        cumulative_probability+=item_probability
+        if x < cumulative_probability: 
+            break
+    return item
+
+
+
+'''下面这段程序产生了样本'''
+beta = np.array([[1,2]])
+sample = np.zeros((500,2))
+
+for i in range(500):
+    sample[i][0] = np.random.uniform(-1,1)
+    p_1 = 1/(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+    p_2 = np.exp(sample[i][0]*beta[0][0])/(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+    p_3 = np.exp(sample[i][0]*beta[0][1])/(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+    sample[i][1] = random_pick([0,1,2],[p_1,p_2,p_3])
+
+'''下面这段程序产生了一元逻辑分布的随机数'''
+'''beta = 20
+sample = np.zeros((500,2))
+
+for i in range(500):
+    sample[i][0] = np.random.uniform(-1,1) 
+    #print(sample[i][0])
+    p_1 = 1/(1+np.exp(-sample[i][0]*beta))
+    p_2 = np.exp(-sample[i][0]*beta)/(1+np.exp(-sample[i][0]*beta))
+    #print(p_1)
+    #if p_1 >= p_2:
+        #sample[i][1] = 0
+    #else:
+        #sample[i][1] = 1
+        
+    sample[i][1] = random_pick([1,0],[p_1,p_2])'''
+    
+    
+'''下面这段产生了新的参数'''
+'''
+Beta = np.array([[0,0]])
+sigma = np.zeros((2,2))
+
+for i in range(1000):
+    sigma[0][0] = sigma[0][0] + (np.square(sample[i][0])*np.exp(sample[i][0]*Beta[0][0])*(1+np.exp(sample[i][0]*Beta[0][1])))/np.square(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+    sigma[0][1] = sigma[0][0] - (np.square(sample[i][0])*np.exp(sample[i][0]*Beta[0][0]+sample[i][0]*Beta[0][1]))/np.square(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+    sigma[1][0] = sigma[0][0] - (np.square(sample[i][0])*np.exp(sample[i][0]*Beta[0][0]+sample[i][0]*Beta[0][1]))/np.square(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+    sigma[1][1] = sigma[0][0] + (np.square(sample[i][0])*np.exp(sample[i][0]*Beta[0][1])*(1+np.exp(sample[i][0]*Beta[0][0])))/np.square(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+    
+sigma = np.linalg.inv(sigma)
+
+R_1 = cholesky(sigma)  
+s_1 = np.dot(np.random.randn(1, 2), R) + Beta '''
+
+#q_d = (1/(2*np.pi))*np.linalg.det(R)*np.exp(-0.5*np.dot(np.dot(s-Beta,np.linalg.inv(Sigma)),(s-Beta).T))
+#q_u = (1/(2*np.pi))*np.linalg.det(R)*np.exp(-0.5*np.dot(np.dot(s-Beta,np.linalg.inv(Sigma)),(s-Beta).T))
+
+
+def pi_1(sample):
+    multiply = 1
+    sum1 = 0
+    for i in range(200):
+        multiply = multiply*(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+        print(1+np.exp(sample[i][0]*beta[0][0])+np.exp(sample[i][0]*beta[0][1]))
+        print(multiply)
+        sum1 = sum1 + sample[i][0]*beta[0][0]*(-np.square(sample[i][1])+2*sample[i][1])+sample[i][0]*beta[0][1]*(0.5*np.square(sample[i][1])-0.5*sample[i][1])
+    pi_0 = np.exp(sum1)/multiply
+    return pi_0
+
+'''pi_1 = pi_1(sample)
+
+
+beta = np.zeros((1000,2))
+
+for j in range(1000):
+    print(j)
+    
+    beta[j][0] = 0.03+0.1*i+ np.random.rand()*0.01
+    beta[j][1] = 0.02+0.1*i+ np.random.rand()*0.01'''
+
+
+dd = float('Inf')  
+    
+    
