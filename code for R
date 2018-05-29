@@ -1,0 +1,44 @@
+lupost <- function(beta,x,y){
+  eta <- x%*%beta
+  p <- 1/(1+exp(-eta))
+  logl <- sum(log(p[y == 1])) +sum(log(1-p[y == 0]))
+  return(logl+sum(dnorm(beta,0,2,log = TRUE)))
+}
+
+
+function1 <- function(beta,x,y){
+  up <- exp(sum(x*beta[1]*(-y^2+2*y) + x*beta[2]*(0.5*y^2-0.5*y)))
+  down <- prod(1+exp(x*beta[1])+exp(x*beta[2]))
+  upl <- sum(x*beta[1]*(-y^2+2*y) + x*beta[2]*(0.5*y^2-0.5*y))
+  downl <- sum(log(1+exp(x*beta[1])+exp(x*beta[2])))
+  return(upl-downl)
+} 
+
+function2 <- function(beta,x,y,sigma){
+  a<- ((y-beta[1]*x-beta[2])/sigma)^2
+  b<- -0.5*sum(a)
+  return(b)
+}
+
+function3 <- function(beta,x){
+  K <- 405
+  a <- beta[1]*(1-5^(beta[2]+1))/(beta[2]+1) + K*log(beta[1]) + sum(beta[2]*log(x))
+  return(a)
+}
+
+function4 <- function(beta,x,y){
+  a <- sum(y*log(1/(1+exp(-x*beta))) + (1-y)*log(1-1/(1+exp(-x*beta))))
+  return(a)
+}
+
+out <- metrop(lupost,beta.init,100000,x = x,y =y)
+plot(ts(out$batch)) 
+
+
+test10000 <- read.csv("sample_1bate.csv", header = FALSE)
+atest10000 <- test10000
+atest10000$V2 <- NULL
+atest10000 <- as.matrix(atest10000)
+btest10000 <- test10000$V2
+out <- metrop(function1,beta_init,20000,x = atest10000,y =btest10000)
+plot(ts(out$batch)) 
